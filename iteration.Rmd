@@ -1,34 +1,33 @@
-# Iteration
+# Iteración
 
-## Introduction
+## Introducción
 
-In [functions], we talked about how important it is to reduce duplication in your code by creating functions instead of copying-and-pasting. Reducing code duplication has three main benefits:
+En [funciones], hablamos sobre la importancia de reducir la duplicación en el código creando funciones en lugar de copiar y pegar. Reducir la duplicación de código tiene tres beneficios principales:
 
-1.  It's easier to see the intent of your code, because your eyes are
-    drawn to what's different, not what stays the same.
+1. Es más fácil ver el objetivo de tu código, lo diferente llama
+	más atención a la vista que aquello que permanece igual.
+        
+2. Es más sencillo responder a cambios en los requerimientos.  A medida que tus 
+	necesidades cambian, solo necesitarás realizar cambios en un lugar, en vez
+	de recordar cambiar en cada lugar donde copiaste y pegaste el código.
+
+3. Es probable que tengas menos errores porque cada línea de código es
+    utilizado en más lugares.
     
-1.  It's easier to respond to changes in requirements. As your needs 
-    change, you only need to make changes in one place, rather than
-    remembering to change every place that you copied-and-pasted the 
-    code.
-    
-1.  You're likely to have fewer bugs because each line of code is 
-    used in more places.
+Una herramienta para reducir la duplicación de código son las funciones, que reducen dicha duplicación al identificar patrones repetidos de código y extraerlos en piezas independientes que pueden reutilizarse y actualizarse fácilmente. Otra herramienta para reducir la duplicación es la __iteración__, que te ayuda cuando necesitas hacer la misma tarea con múltiples entradas: repetir la misma operación en diferentes columnas o en diferentes conjuntos de datos.
+En este capítulo aprenderás sobre dos paradigmas de iteración importantes: la programación imperativa y la programación funcional. Por el lado imperativo, tienes herramientas como bucles _for_ (del inglés _para_) y bucles _while_ (del inglés _mientras_), que son un gran lugar para comenzar porque hacen que la iteración sea muy explícita, por lo que es obvio qué está pasando. Sin embargo, los bucles _for_ son bastante detallados y requieren bastante código que se duplica para cada bucle. La programación funcional (PF) ofrece herramientas para extraer este código duplicado, por lo que cada patrón común de bucle obtiene su propia función. Una vez que domines el vocabulario de PF, podrás resolver muchos problemas comunes de iteración con menos código, más facilidad y menos errores.
 
-One tool for reducing duplication is functions, which reduce duplication by identifying repeated patterns of code and extract them out into independent pieces that can be easily reused and updated. Another tool for reducing duplication is __iteration__, which helps you when you need to do the same thing to multiple inputs: repeating the same operation on different columns, or on different datasets. 
-In this chapter you'll learn about two important iteration paradigms: imperative programming and functional programming. On the imperative side you have tools like for loops and while loops, which are a great place to start because they make iteration very explicit, so it's obvious what's happening. However, for loops are quite verbose, and require quite a bit of bookkeeping code that is duplicated for every for loop. Functional programming (FP) offers tools to extract out this duplicated code, so each common for loop pattern gets its own function. Once you master the vocabulary of FP, you can solve many common iteration problems with less code, more ease, and fewer errors.
+### Pre requisitos
 
-### Prerequisites
-
-Once you've mastered the for loops provided by base R, you'll learn some of the powerful programming tools provided by purrr, one of the tidyverse core packages.
+Una vez que hayas dominado los bucles _for_ proporcionados por R base, aprenderás algunas de las potentes herramientas de programación proporcionadas por __purrr__, uno de los paquetes principales de _tidyverse_.
 
 ```{r setup, message = FALSE}
 library(tidyverse)
 ```
 
-## For loops
+## Bucles _for_
 
-Imagine we have this simple tibble:
+Imagina que tenemos este simple _tibble_:
 
 ```{r}
 df <- tibble(
@@ -39,7 +38,7 @@ df <- tibble(
 )
 ```
 
-We want to compute the median of each column. You _could_ do with copy-and-paste:
+Queremos calcular la mediana de cada columna. _Podrías hacerlo_ copiando y pegando el siguiente código:
 
 ```{r}
 median(df$a)
@@ -48,67 +47,68 @@ median(df$c)
 median(df$d)
 ```
 
-But that breaks our rule of thumb: never copy and paste more than twice. Instead, we could use a for loop:
+Pero eso rompe nuestra regla de oro: nunca copie y pegue más de dos veces. En cambio, podríamos usar un bucle _for_:
 
 ```{r}
-output <- vector("double", ncol(df))  # 1. output
-for (i in seq_along(df)) {            # 2. sequence
-  output[[i]] <- median(df[[i]])      # 3. body
+output <- vector("double", ncol(df))  # 1. _output_ (salida o resultado)
+for (i in seq_along(df)) {            # 2. secuencia
+  output[[i]] <- median(df[[i]])      # 3. cuerpo
 }
 output
 ```
 
-Every for loop has three components:
+Cada bucle tiene tres componentes:
 
-1.  The __output__: `output <- vector("double", length(x))`. 
-    Before you start the loop, you must always allocate sufficient space 
-    for the output. This is very important for efficiency: if you grow
-    the for loop at each iteration using `c()` (for example), your for loop 
-    will be very slow. 
+1.  __output__: `output <- vector("double", length(x))`. 
+    Antes de comenzar el bucle, siempre debes asignar suficiente espacio
+    para la salida. Esto es muy importante para la eficiencia: si aumentas
+    el bucle _for_ en cada iteración usando, por ejemplo, `c ()` , el bucle _for_
+    será muy lento.
+      
+    Una forma general de crear un vector vacío de longitud dada es la función `vector ()`. 
+	Tiene dos argumentos: el tipo de vector (_"logical"_, 
+    _"integer"_, _"double"_, _"character"_, etc) y su longitud.
     
-    A general way of creating an empty vector of given length is the `vector()`
-    function. It has two arguments: the type of the vector ("logical", 
-    "integer", "double", "character", etc) and the length of the vector. 
-
-1.  The __sequence__: `i in seq_along(df)`. This determines what to loop over:
-    each run of the for loop will assign `i` to a different value from 
-    `seq_along(df)`. It's useful to think of `i` as a pronoun, like "it".
+2.  La __secuencia__: `i in seq_along (df)`. Este código determina sobre qué iterar:
+    cada ejecución del bucle _for_ asignará a `i` un valor diferente de
+    `seq_along (df)`. Es útil pensar en `i` como un pronombre, como "eso".
     
-    You might not have seen `seq_along()` before. It's a safe version of the 
-    familiar `1:length(l)`, with an important difference: if you have a
-    zero-length vector, `seq_along()` does the right thing:
-
+	Es posible que no hayas visto `seq_along ()` con anterioridad. Es una versión segura de la
+    familiar `1:length(l)`, con una diferencia importante: si se tiene un
+    vector de longitud cero, `seq_along ()` hace lo correcto:
+    
     ```{r}
     y <- vector("double", 0)
     seq_along(y)
     1:length(y)
     ```
     
-    You probably won't create a zero-length vector deliberately, but
-    it's easy to create them accidentally. If you use `1:length(x)` instead
-    of `seq_along(x)`, you're likely to get a confusing error message.
+    Probablemente no vas a crear un vector de longitud cero deliberadamente, pero
+    es fácil crearlos accidentalmente. Si usamos `1: length (x)` en lugar
+    de `seq_along (x)`, es posible que obtengamos un mensaje de error confuso.
     
-1.  The __body__: `output[[i]] <- median(df[[i]])`. This is the code that does
-    the work. It's run repeatedly, each time with a different value for `i`.
-    The first iteration will run `output[[1]] <- median(df[[1]])`, 
-    the second will run `output[[2]] <- median(df[[2]])`, and so on.
+3.	El __cuerpo__: `output[[i]] <- median(df[[i]])`. Este es el código que hace
+	el trabajo. Se ejecuta repetidamente, con un valor diferente para `i` cada vez.
+	La primera iteración ejecutará `output[[1]] <- median(df[[1]])`,
+	la segunda ejecutará `output [[2]] <- median (df [[2]])`, y así sucesivamente.
+	
+¡Eso es todo lo que hay para el bucle _for_! Ahora es un buen momento para practicar creando algunos bucles _for_ básicos (y no tan básicos) usando los ejercicios que se encuentran a continuación. Luego avanzaremos en algunas variaciones del bucle _for_ que te ayudarán a resolver otros problemas que surgirán en la práctica.
 
-That's all there is to the for loop! Now is a good time to practice creating some basic (and not so basic) for loops using the exercises below. Then we'll move on some variations of the for loop that help you solve other problems that will crop up in practice. 
 
-### Exercises
+### Ejercicios
 
-1.  Write for loops to:
+1.  Escribir bucles _for_ para:
 
-    1. Compute the mean of every column in `mtcars`.
-    1. Determine the type of each column in `nycflights13::flights`.
-    1. Compute the number of unique values in each column of `iris`.
-    1. Generate 10 random normals for each of $\mu = -10$, $0$, $10$, and $100$.
+    1. Calcular la media de cada columna en `mtautos`.
+    2. Determinar el tipo de cada columna en `vuelos`.
+    3. Calcular el número de valores únicos en cada columna de `iris`.
+    4. Genera 10 normales aleatorias para cada valor de $\mu = -10$, $0$, $10$ y $100$.
     
-    Think about the output, sequence, and body __before__ you start writing
-    the loop.
+    Piensa en el resultado, la secuencia y el cuerpo __antes__ de empezar a escribir
+    el bucle.
 
-1.  Eliminate the for loop in each of the following examples by taking 
-    advantage of an existing function that works with vectors:
+2.  Elimina el bucle _for_ en cada uno de los siguientes ejemplos tomando
+     ventaja de una función existente que trabaja con vectores:
     
     ```{r, eval = FALSE}
     out <- ""
@@ -131,21 +131,23 @@ That's all there is to the for loop! Now is a good time to practice creating som
     }
     ```
 
-1.  Combine your function writing and for loop skills:
+3.  Combina tus habilidades para escribir funciones y bucles _for_:
 
-    1. Write a for loop that `prints()` the lyrics to the children's song 
-       "Alice the camel".
+    1. Escribe un bucle _for_ que imprima (_`prints()`_) la letra de la canción de niños
+       "Cinco ranitas verdes".
 
-    1. Convert the nursery rhyme "ten in the bed" to a function. Generalise 
-       it to any number of people in any sleeping structure.
+    2. Convierte la canción infantil "10 monitos saltaban en la cama" en una función. Generalizar
+       a cualquier cantidad de monitos en cualquier estructura para dormir.
 
-    1. Convert the song "99 bottles of beer on the wall" to a function.
-       Generalise to any number of any vessel containing any liquid on 
-       any surface.
+    3. Convierte la canción "99 botellas de cerveza en la pared" en una función.
+       Generalizar a cualquier cantidad, de cualquier tipo de recipiente que contenga 
+       cualquier líquido sobre cualquier superficie.
 
-1.  It's common to see for loops that don't preallocate the output and instead
+4.  It's common to see for loops that don't preallocate the output and instead
     increase the length of a vector at each step:
-    
+    Es común ver bucles _for_ que no preasignan la salida y en su lugar
+    aumentan la longitud de un vector en cada paso:
+     
     ```{r, eval = FALSE}
     output <- vector("integer", 0)
     for (i in seq_along(x)) {
@@ -154,22 +156,22 @@ That's all there is to the for loop! Now is a good time to practice creating som
     output
     ```
     
-    How does this affect performance? Design and execute an experiment.
+    ¿Cómo afecta esto el rendimiento? Diseña y ejecuta un experimento.
 
-## For loop variations
+## Variaciones de bucles _for_
 
-Once you have the basic for loop under your belt, there are some variations that you should be aware of. These variations are important regardless of how you do iteration, so don't forget about them once you've mastered the FP techniques you'll learn about in the next section.
+Una vez que tienes el bucle _for_ básico bajo tu cinturón, hay algunas variaciones que debes tener en cuenta. Estas variaciones son importantes independientemente de cómo hagas la iteración, así que no te olvides de ellas una vez que hayas dominado las técnicas de PF que aprenderás en la próxima sección.
 
-There are four variations on the basic theme of the for loop:
+Hay cuatro variaciones del ciclo _for_ básico:
 
-1.  Modifying an existing object, instead of creating a new object.
-1.  Looping over names or values, instead of indices.
-1.  Handling outputs of unknown length.
-1.  Handling sequences of unknown length.
+1.  Modificar un objeto existente, en lugar de crear un nuevo objeto.
+2.  Iterar sobre nombres o valores, en lugar de índices.
+3.  Manejo de _outputs_ de longitud desconocida.
+4.  Manejo de secuencias de longitud desconocida.
 
-### Modifying an existing object
+### Modificar un objeto existente
 
-Sometimes you want to use a for loop to modify an existing object. For example, remember our challenge from [functions]. We wanted to rescale every column in a data frame:
+Algunas veces quiere usar un bucle for para modificar un objeto existente. Por ejemplo, recuerda nuestro desafío de [funciones]. Queríamos reescalar cada columna en un _data frame_:
 
 ```{r}
 df <- tibble(
@@ -189,16 +191,16 @@ df$c <- rescale01(df$c)
 df$d <- rescale01(df$d)
 ```
 
-To solve this with a for loop we again think about the three components:
+Para resolver esto con un bucle _for_, volvemos a pensar en los tres componentes:
 
-1.  __Output__: we already have the output --- it's the same as the input!
+1.  __Output__: ya tenemos el _output_ --- ¡es lo mismo que la entrada!
 
-1.  __Sequence__: we can think about a data frame as a list of columns, so 
-    we can iterate over each column with `seq_along(df)`.
+2.  __Secuencia__: podemos pensar en un _data frame_ como una lista de columnas, por lo
+     que podemos iterar sobre cada columna con `seq_along (df)`.
 
-1.  __Body__: apply `rescale01()`.
+3.  __Cuerpo__: aplicar `rescale01 ()`.
 
-This gives us:
+Esto nos da:
 
 ```{r}
 for (i in seq_along(df)) {
@@ -206,27 +208,26 @@ for (i in seq_along(df)) {
 }
 ```
 
-Typically you'll be modifying a list or data frame with this sort of loop, so remember to use `[[`, not `[`. You might have spotted that I used `[[` in all my for loops: I think it's better to use `[[` even for atomic vectors because it makes it clear that I want to work with a single element.
+Por lo general, se modificará una lista o un _data frame_ con este tipo de bucle, así que recuerde usar `[[`, not `[`. Podrás haber visto que usamos `[[` en todos los bucles _for_: creemos que es mejor usar `[[` incluso para vectores atómicos porque deja en claro que queremos trabajar con un solo elemento.
 
-### Looping patterns
+### Patrones de bucle
 
-There are three basic ways to loop over a vector. So far I've shown you the most general: looping over the numeric indices with `for (i in seq_along(xs))`, and extracting the value with `x[[i]]`. There are two other forms:
+Hay tres formas básicas de hacer un bucle sobre un vector. Hasta ahora hemos visto la más general: iterar sobre los índices numéricos con `for (i in seq_along (xs))`, y extraer el valor con `x [[i]]`. Hay otras dos formas:
 
-1.  Loop over the elements: `for (x in xs)`. This is most useful if you only
-    care about side-effects, like plotting or saving a file, because it's
-    difficult to save the output efficiently.
+1.  Iterar sobre los elementos: `for (x in xs)`. Esta forma es la más útil si solo
+    te preocupas por los efectos secundario, como graficar o grabar un archivo, porque es 
+    dificil almacenar la salida (_output_) de forma eficiente.
 
-1.  Loop over the names: `for (nm in names(xs))`. This gives you name, which
-    you can use to access the value with `x[[nm]]`. This is useful if you want 
-    to use the name in a plot title or a file name. If you're creating
-    named output, make sure to name the results vector like so:
+2.  Iterar sobre los nombres: `for (nm in names(xs))`. te da el nombre, que se puede usar para acceder al valor con `x [[nm]]`. 
+	Esto es útil si queremos utilizar el nombre en el título de un gráfico o 
+    en el nombre de un archivo. Si estas creando una salida con nombre, asegúrate de nombrar el vector de resultados de esta manera:
     
     ```{r, eval = FALSE}
     results <- vector("list", length(x))
     names(results) <- names(x)
     ```
 
-Iteration over the numeric indices is the most general form, because given the position you can extract both the name and the value:
+3.	Iterar sobre los índices numéricos es la forma más general, porque dada la posición se puede extraer tanto el nombre como el valor:
 
 ```{r, eval = FALSE}
 for (i in seq_along(x)) {
@@ -235,9 +236,10 @@ for (i in seq_along(x)) {
 }
 ```
 
-### Unknown output length
+### Longitud de _output_ desconocida
 
 Sometimes you might not know how long the output will be. For example, imagine you want to simulate some random vectors of random lengths. You might be tempted to solve this problem by progressively growing the vector:
+Es posible que algunas veces no sepas el tamaño que tendrá el _output_. Por ejemplo, imagina que quieres simular algunos vectores aleatorios de longitudes aleatorias. Podrías tentarte a resolver este problema haciendo crecer progresivamente el vector:
 
 ```{r}
 means <- c(0, 1, 2)
@@ -250,9 +252,9 @@ for (i in seq_along(means)) {
 str(output)
 ```
 
-But this is not very efficient because in each iteration, R has to copy all the data from the previous iterations. In technical terms you get "quadratic" ($O(n^2)$) behaviour which means that a loop with three times as many elements would take nine ($3^2$) times as long to run.
+Pero esto no es muy eficiente porque en cada iteración, R tiene que copiar todos los datos de las iteraciones anteriores. En términos técnicos, obtiene un comportamiento "cuadrático" ($O(n^2)$), lo que significa que un bucle que tiene tres veces más elementos tomaría nueve ($3^2$) veces más tiempo de ejecución.
 
-A better solution to save the results in a list, and then combine into a single vector after the loop is done:
+Una mejor solución es guardar los resultados en una lista, y luego combinarlos en un solo vector después de que se complete el ciclo:
 
 ```{r}
 out <- vector("list", length(means))
@@ -264,43 +266,42 @@ str(out)
 str(unlist(out))
 ```
 
-Here I've used `unlist()` to flatten a list of vectors into a single vector. A stricter option is to use `purrr::flatten_dbl()` --- it will throw an error if the input isn't a list of doubles.
+Aquí usamos `unlist ()` (del inglés _deslistar_) para aplanar una lista de vectores en un solo vector. Una opción más estricta es usar `purrr :: flatten_dbl ()` (del inglés _aplanar_) --- arrojará un error si la entrada no es una lista de dobles.
 
-This pattern occurs in other places too:
+Este patrón ocurre también en otros lugares:
 
-1.  You might be generating a long string. Instead of `paste()`ing together 
-    each iteration with the previous, save the output in a character vector and
-    then combine that vector into a single string with 
+1.  Podriamos estar generando una cadena larga. En lugar de pegar (`paste ()`) juntos
+    cada iteración con la anterior, guardamos el _output_ en un vector de caracteres y
+    luego combinamos ese vector en una cadena con
     `paste(output, collapse = "")`.
    
-1.  You might be generating a big data frame. Instead of sequentially
-    `rbind()`ing in each iteration, save the output in a list, then use 
-    `dplyr::bind_rows(output)` to combine the output into a single
-    data frame.
+2. Podríamos estar generando un _data frame_ grande. En lugar de enlazar (`rbind ()`) secuencialmente
+   en cada iteración, guardamos el resultado en una lista y luego usamos
+    `dplyr::bind_rows(output)` para combinar el _output_ en un solo _data frame_.
 
-Watch out for this pattern. Whenever you see it, switch to a more complex result object, and then combine in one step at the end.
+Cuidado con este patrón. Cuando lo veamos, cambiemos a un objeto de resultado más complejo y luego lo combinamos en un paso al final.
 
-### Unknown sequence length
+### Longitud de secuencia desconocida
 
-Sometimes you don't even know how long the input sequence should run for. This is common when doing simulations. For example, you might want to loop until you get three heads in a row. You can't do that sort of iteration with the for loop. Instead, you can use a while loop. A while loop is simpler than for loop because it only has two components, a condition and a body:
+A veces ni siquiera sabemos cuánto tiempo puede durar la secuencia de entrada. Esto es común cuando se hacen simulaciones. Por ejemplo, es posible que se quiera realizar un bucle hasta que se obtengan tres cabezas seguidas. No podemos hacer ese tipo de iteración con un bucle _for_. En su lugar, podemos utilizar un bucle _while_ (del inglés _mientras_). Un bucle _while_ es más simple que el bucle _for_ porque solo tiene dos componentes, una condición y un cuerpo:
 
 ```{r, eval = FALSE}
-while (condition) {
-  # body
+while (condición) {
+  # cuerpo
 }
 ```
 
-A while loop is also more general than a for loop, because you can rewrite any for loop as a while loop, but you can't rewrite every while loop as a for loop:
+Un bucle _while_ también es más general que un bucle _for_, porque podemos reescribir cualquier bucle _for_ como un bucle _while_, pero no podemos reescribir cada bucle _while_ como un bucle _for_:
 
 ```{r, eval = FALSE}
 for (i in seq_along(x)) {
-  # body
+  # cuerpo
 }
 
-# Equivalent to
+# Equivalente a 
 i <- 1
 while (i <= length(x)) {
-  # body
+  # cuerpo
   i <- i + 1 
 }
 ```
