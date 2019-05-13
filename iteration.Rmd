@@ -143,9 +143,7 @@ Cada bucle tiene tres componentes:
        Generalizar a cualquier cantidad, de cualquier tipo de recipiente que contenga 
        cualquier líquido sobre cualquier superficie.
 
-4.  It's common to see for loops that don't preallocate the output and instead
-    increase the length of a vector at each step:
-    Es común ver bucles _for_ que no preasignan la salida y en su lugar
+4.  Es común ver bucles _for_ que no preasignan la salida y en su lugar
     aumentan la longitud de un vector en cada paso:
      
     ```{r, eval = FALSE}
@@ -238,7 +236,6 @@ for (i in seq_along(x)) {
 
 ### Longitud de _output_ desconocida
 
-Sometimes you might not know how long the output will be. For example, imagine you want to simulate some random vectors of random lengths. You might be tempted to solve this problem by progressively growing the vector:
 Es posible que algunas veces no sepas el tamaño que tendrá el _output_. Por ejemplo, imagina que quieres simular algunos vectores aleatorios de longitudes aleatorias. Podrías tentarte a resolver este problema haciendo crecer progresivamente el vector:
 
 ```{r}
@@ -306,7 +303,7 @@ while (i <= length(x)) {
 }
 ```
 
-Here's how we could use a while loop to find how many tries it takes to get three heads in a row:
+Así es como podríamos usar un bucle _while_ para encontrar cuántos intentos se necesitan para obtener tres cabezas (_heads_ en inglés) seguidas:
 
 ```{r}
 flip <- function() sample(c("T", "H"), 1)
@@ -325,35 +322,36 @@ while (nheads < 3) {
 flips
 ```
 
-I mention while loops only briefly, because I hardly ever use them. They're most often used for simulation, which is outside the scope of this book. However, it is good to know they exist so that you're prepared for problems where the number of iterations is not known in advance.
+Mencionamos los bucles _while_ brevemente, porque casi nunca los usamos. Se utilizan con mayor frecuencia para la simulación, que está fuera del alcance de este libro. Sin embargo, es bueno saber que existen para que estemos preparado para problemas en los que el número de iteraciones no se conoce de antemano.
 
-### Exercises
+### Ejercicios
 
-1.  Imagine you have a directory full of CSV files that you want to read in.
-    You have their paths in a vector, 
-    `files <- dir("data/", pattern = "\\.csv$", full.names = TRUE)`, and now
-    want to read each one with `read_csv()`. Write the for loop that will 
-    load them into a single data frame. 
+1.  Imaginemos que tenemos un directorio lleno de archivos CSV que queremos leer.
+    Tenemos sus ubicaciones en un vector, 
+    `files <- dir("data/", pattern = "\\.csv$", full.names = TRUE)`, y ahora
+    queremos leer cada uno con `read_csv()`. Escribe un bucle _for_ que los
+    cargue en un solo _data frame_ 
+    
 
-1.  What happens if you use `for (nm in names(x))` and `x` has no names?
-    What if only some of the elements are named? What if the names are
-    not unique?
+1.  ¿Qué pasa si utilizamos `for (nm in names(x))` y `x` no tiene _names_?
+    ¿Qué pasa si solo algunos elementos están nombrados (_named_ en inglés) 
+    ¿Qué pasa si los nombres (_names_ en inglés) no son únicos?
 
-1.  Write a function that prints the mean of each numeric column in a data 
-    frame, along with its name. For example, `show_mean(iris)` would print:
+1.  Escribir una función que imprima el promedio de cada columna numérica en un
+	_data frame_, junto con su nombre. Por ejemplo, `mostrar_promedio(iris)` debe imprimir:
     
     ```{r, eval = FALSE}
-    show_mean(iris)
+    mostrar_promedio(iris)
     #> Sepal.Length: 5.84
     #> Sepal.Width:  3.06
     #> Petal.Length: 3.76
     #> Petal.Width:  1.20
     ```
     
-    (Extra challenge: what function did I use to make sure that the numbers
-    lined up nicely, even though the variable names had different lengths?)
-
-1.  What does this code do? How does it work?
+    (Desafío adicional: ¿qué función utilizamos para asegurarnos que los números
+    queden alineados a pesar que los nombres de las variables tienen diferentes longitudes?)
+    
+1.  ¿Qué hace este código? ¿cómo funciona? 
 
     ```{r, eval = FALSE}
     trans <- list( 
@@ -367,11 +365,12 @@ I mention while loops only briefly, because I hardly ever use them. They're most
     }
     ```
 
-## For loops vs. functionals
+## Bucles _for_ vs. funcionales
 
-For loops are not as important in R as they are in other languages because R is a functional programming language. This means that it's possible to wrap up for loops in a function, and call that function instead of using the for loop directly.
+Los bucles _for_ no son tan importantes en R como en otros lenguajes porque R es un lenguaje de programación funcional. Esto significa que es posible envolver los bucles en una función y llamar a esa función en lugar de usar el bucle _for_ directamente.
 
-To see why this is important, consider (again) this simple data frame:
+
+Para ver por qué esto es importante, consideremos (nuevamente) este simple _data frame_:
 
 ```{r}
 df <- tibble(
@@ -383,6 +382,7 @@ df <- tibble(
 ```
 
 Imagine you want to compute the mean of every column. You could do that with a for loop:
+Imaginemos que queremos calcular la media de cada columna. Podríamos hacer eso con un bucle _for_:
 
 ```{r}
 output <- vector("double", length(df))
@@ -392,7 +392,7 @@ for (i in seq_along(df)) {
 output
 ```
 
-You realise that you're going to want to compute the means of every column pretty frequently, so you extract it out into a function:
+Nos damos cuenta que vamos a querer calcular los promedios de cada columna con bastante frecuencia, por lo que lo extraemos en una función:
 
 ```{r}
 col_mean <- function(df) {
@@ -405,6 +405,7 @@ col_mean <- function(df) {
 ```
 
 But then you think it'd also be helpful to be able to compute the median, and the standard deviation, so you copy and paste your `col_mean()` function and replace the `mean()` with `median()` and `sd()`:
+Pero entonces pensamos que también sería útil poder calcular la mediana y la desviación estándar, así que copiamos y pegamos la función `col_mean ()` y reemplazamos `mean ()` con `median ()` y `sd ()`:
 
 ```{r}
 col_median <- function(df) {
@@ -423,9 +424,9 @@ col_sd <- function(df) {
 }
 ```
 
-Uh oh! You've copied-and-pasted this code twice, so it's time to think about how to generalise it. Notice that most of this code is for-loop boilerplate and it's hard to see the one thing (`mean()`, `median()`, `sd()`) that is different between the functions.
+¡Oh oh! Copiamos y pegamos este código dos veces, por lo que es hora de pensar cómo generalizarlo. Tengamos en cuenta que la mayoría de este código corresponde al _for_ y es repetitivo, haciendo difícil ver la única cosa (`mean ()`, `median ()`, `sd ()`) que es diferente entre las funciones.
 
-What would you do if you saw a set of functions like this:
+¿Qué podemos hacer si vemos un conjunto de funciones como esta?:
 
 ```{r}
 f1 <- function(x) abs(x - mean(x)) ^ 1
@@ -433,15 +434,15 @@ f2 <- function(x) abs(x - mean(x)) ^ 2
 f3 <- function(x) abs(x - mean(x)) ^ 3
 ```
 
-Hopefully, you'd notice that there's a lot of duplication, and extract it out into an additional argument:
+Con suerte, notaremos que hay mucha duplicación y la extraeremos en un argumento adicional:
 
 ```{r}
 f <- function(x, i) abs(x - mean(x)) ^ i
 ```
 
-You've reduced the chance of bugs (because you now have 1/3 less code), and made it easy to generalise to new situations. 
+Hemos reducido la posibilidad de errores (porque ahora tenemos 1/3 menos de código) y hemos facilitado la generalización de situaciones nuevas.
 
-We can do exactly the same thing with `col_mean()`, `col_median()` and `col_sd()` by adding an argument that supplies the function to apply to each column:
+Podemos hacer exactamente lo mismo con `col_mean ()`, `col_median ()` y `col_sd ()` agregando un argumento que proporciona la función para aplicar a cada columna:
 
 ```{r}
 col_summary <- function(df, fun) {
@@ -455,47 +456,44 @@ col_summary(df, median)
 col_summary(df, mean)
 ```
 
-The idea of passing a function to another function is extremely powerful idea, and it's one of the behaviours that makes R a functional programming language. It might take you a while to wrap your head around the idea, but it's worth the investment. In the rest of the chapter, you'll learn about and use the __purrr__ package, which provides functions that eliminate the need for many common for loops. The apply family of functions in base R (`apply()`, `lapply()`, `tapply()`, etc) solve a similar problem, but purrr is more consistent and thus is easier to learn.
+La idea de pasar una función a otra es extremadamente poderosa, y es uno de los comportamientos que hacen de R un lenguaje de programación funcional. Puede que te tome un tiempo comprender la idea, pero vale la pena el esfuerzo. En el resto del capítulo, aprenderás y usarás el paquete __purrr__, que proporciona funciones que eliminan la necesidad de muchos bucles comunes. La familia de funciones de _apply_ (aplicar en innglés) en base R (`apply ()`, `lapply ()`, `tapply ()`, etc.) resuelve un problema similar, pero _purrr_ es más consistente y por lo tanto es más fácil de aprender.
 
-The goal of using purrr functions instead of for loops is to allow you break common list manipulation challenges into independent pieces: 
+El objetivo de usar las funciones _purrr_ en lugar de los bucles es permitir dividir los desafíos comunes de manipulación de listas en partes independientes:
 
-1. How can you solve the problem for a single element of the list? Once
-   you've solved that problem, purrr takes care of generalising your
-   solution to every element in the list.
+1. ¿Cómo podemos resolver el problema para un solo elemento de la lista? 
+	Una vez que encontramos la solución, _purrr_ se encarga de generalizala 
+	a cada elemento de la lista.
 
-1. If you're solving a complex problem, how can you break it down into
-   bite-sized pieces that allow you to advance one small step towards a 
-   solution? With purrr, you get lots of small pieces that you can
-   compose together with the pipe.
+2.	Si estamos resolviendo un problema complejo, ¿cómo podemos dividirlo 
+	en pequeñas etapas que nos permitan avanzar paso a paso hacia la solución? 
+	Con __purrr__, obtienes muchas piezas pequeñas que puedes ensamblar junto con el _pipe_.
+	
+Esta estructura facilita la resolución de nuevos problemas. También hace que sea más fácil entender nuestras soluciones a problemas antiguos cuando releemos un código anterior.
 
-This structure makes it easier to solve new problems. It also makes it easier to understand your solutions to old problems when you re-read your old code.
+### Ejercicios
 
-### Exercises
+1.  Lee la documentación para `apply ()`. En el caso 2d, ¿qué dos bucles _for_ generaliza?
 
-1.  Read the documentation for `apply()`. In the 2d case, what two for loops
-    does it generalise?
+2. Adapta `col_summary ()` para que solo se aplique a las columnas numéricas. 
+	Es posible que desees comenzar con la función `is_numeric ()` que devuelve un vector lógico que tenga un _TRUE_ por cada columna numérica.
+	
+## Las funciones _map_ (mapa en inglés)
 
-1.  Adapt `col_summary()` so that it only applies to numeric columns
-    You might want to start with an `is_numeric()` function that returns
-    a logical vector that has a TRUE corresponding to each numeric column.
+El patrón de iterar sobre un vector, hacer algo con cada elemento y guardar los resultados es tan común que el paquete __purrr__ proporciona una familia de funciones para que lo hagan por nosotros. Hay una función para cada tipo de _output_:
 
-## The map functions
+* `map ()` crea una lista.
+* `map_lgl ()` crea un vector lógico.
+* `map_int ()` crea un vector entero.
+* `map_dbl ()` crea un vector doble.
+* `map_chr ()` crea un vector de caracteres.
 
-The pattern of looping over a vector, doing something to each element and saving the results is so common that the purrr package provides a family of functions to do it for you. There is one function for each type of output:
+Cada función toma un vector como entrada, aplica una función a cada elemento y luego devuelve un nuevo vector que tiene la misma longitud (y tiene los mismos nombres) que la entrada. El tipo de vector está determinado por el sufijo de la función _map_.
 
-* `map()`     makes a list.
-* `map_lgl()` makes a logical vector.
-* `map_int()` makes an integer vector.
-* `map_dbl()` makes a double vector.
-* `map_chr()` makes a character vector.
+Una vez que domines estas funciones, descubrirás que lleva mucho menos tiempo resolver los problemas de iteración. Pero nunca debes sentirse mal por usar un bucle for en lugar de una función de mapeo. Las funciones de mapeo son un nivel superior de abstracción, y puede llevar mucho tiempo entender cómo funcionan. Lo importante es que resuelvas el problema en el que estás trabajando, no que escribas el código más conciso y elegante (¡aunque eso es definitivamente algo hacia lo que quieres llegar!).
 
-Each function takes a vector as input, applies a function to each piece, and then returns a new vector that's the same length (and has the same names) as the input. The type of the vector is determined by the suffix to the map function. 
+Algunas personas te dirán que evites los bucles porque son lentos. ¡Están equivocados! (Bueno, al menos están bastante desactualizados, ya que los bucles han dejado de ser lentos desde hace muchos años). Los principales beneficios de usar funciones como `map ()` no es la velocidad, sino la claridad: hacen que tu código sea más fácil de escribir y leer.
 
-Once you master these functions, you'll find it takes much less time to solve iteration problems. But you should never feel bad about using a for loop instead of a map function. The map functions are a step up a tower of abstraction, and it can take a long time to get your head around how they work. The important thing is that you solve the problem that you're working on, not write the most concise and elegant code (although that's definitely something you want to strive towards!).
-
-Some people will tell you to avoid for loops because they are slow. They're wrong! (Well at least they're rather out of date, as for loops haven't been slow for many years). The chief benefits of using functions like `map()` is not speed, but clarity: they make your code easier to write and to read.
-
-We can use these functions to perform the same computations as the last for loop. Those summary functions returned doubles, so we need to use `map_dbl()`:
+Podemos usar estas funciones para realizar los mismos cálculos que el último bucle for. Esas funciones de resumen devolvían valores decimales, por lo que necesitamos usar `map_dbl ()`:
 
 ```{r}
 map_dbl(df, mean)
@@ -504,6 +502,7 @@ map_dbl(df, sd)
 ```
 
 Compared to using a for loop, focus is on the operation being performed (i.e. `mean()`, `median()`, `sd()`), not the bookkeeping required to loop over every element and store the output. This is even more apparent if we use the pipe:
+Comparado con el uso de un bucle for, el foco está en la operación que se está realizando (es decir, `mean ()`, `median ()`, `sd ()`), y no en llevar la cuenta de las acciones requeridas para recorrer cada elemento y almacenar la salida. Esto es aún más evidente si usamos el _pipe_:
 
 ```{r}
 df %>% map_dbl(mean)
@@ -511,7 +510,7 @@ df %>% map_dbl(median)
 df %>% map_dbl(sd)
 ```
 
-There are a few differences between `map_*()` and `col_summary()`:
+Existen algunas diferencias entre `map _ * ()` y `col_summary ()`:
 
 *   All purrr functions are implemented in C. This makes them a little faster
     at the expense of readability.
